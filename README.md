@@ -1,38 +1,22 @@
-# Custom server using Hapi example
+## Showcase of Vonage SMS and Verify APIs
 
-Most of the times the default Next server will be enough but sometimes you want to run your own server to customize routes or other kind of the app behavior. Next provides a [Custom server and routing](https://github.com/zeit/next.js#custom-server-and-routing) so you can customize as much as you want.
-
-Because the Next.js server is just a node.js module you can combine it with any other part of the node.js ecosystem. in this case we are using [Hapi](https://hapijs.com) to build a custom router on top of Next.
-
-The example shows a server that serves the component living in `pages/a.js` when the route `/b` is requested and `pages/b.js` when the route `/a` is accessed. This is obviously a non-standard routing strategy. You can see how this custom routing is being made inside `server.js`.
-
-## How to use
-
-### Using `create-next-app`
-
-Execute [`create-next-app`](https://github.com/zeit/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
-
-```bash
-npm init next-app --example custom-server-hapi custom-server-hapi-app
-# or
-yarn create next-app --example custom-server-hapi custom-server-hapi-app
+To run this project locally run
 ```
-
-### Download manually
-
-Download the example:
-
-```bash
-curl https://codeload.github.com/zeit/next.js/tar.gz/canary | tar -xz --strip=2 next.js-canary/examples/custom-server-hapi
-cd custom-server-hapi
-```
-
-Install it and run:
-
-```bash
-npm install
-npm run dev
-# or
 yarn
-yarn dev
+VIRTUAL_NUMBER=your-vonage-number yarn dev
 ```
+where `VIRTUAL_NUMBER` is the number you purchased from the Vonage Dashboard.
+
+Next, update `lib/nexmoClient.js` with your API key and secret.
+
+Then start a proxy session with `ngrok` using `ngrok http 3000`, then go to your Vonage Dashboard and update the inbound SMS webhook for your virtual number to point
+to `/webhooks/inbound-sms`.
+
+This implementation is focused on a very happy path and you should not expect it to fail gracefully in many scenarios. 
+The implementation relies on a `displayName` in order to avoid any use of phone numbers in the front-end after registration.
+For a happy path scenario follow these steps:
+- Open localhost:3000 and register by entering your phone number (https://developer.nexmo.com/concepts/guides/glossary#number-format) and a display name (e.g. userA)
+- Enter the verification code you will receive on your phone
+- Register using a different phone number and display name (e.g. userB)
+- Visit localhost:3000/users?displayName=userB and click on the chat button next to userA
+- See the magic happen on your phone(s) as you chat with userA with an anonymous phone number
